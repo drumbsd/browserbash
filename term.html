@@ -1,73 +1,113 @@
 <!doctype html>
 <html>
-  <head>
-    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" charset="utf-8">
-      var socket = io('http://localhost:8080')
-      
-      function add_content(bashOutput){
-        $('div').append('<p>' + bashOutput + '</p>');
-        var scrolledWindow = $('body').height() - $(window).height() + 80
-        $(window).scrollTop(scrolledWindow);
-      }
-      
-      //socket io listeners
-      socket.on('connect',function() {
-        console.log('Client has connected to the server!');
+
+<head>
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    var socket=io('http://localhost:8090')
+
+    function add_content(bashOutput) {
+      $('div').append('<p>'+bashOutput+'</p>');
+      var scrolledWindow=$('body').height()-$(window).height()+80
+      $(window).scrollTop(scrolledWindow);
+    }
+
+    //socket io listeners
+    socket.on('connect',function() {
+      console.log('Client has connected to the server!');
+    });
+
+    socket.on('exit',function(data) {
+      add_content(data);
+    })
+
+    socket.on('message',function(data) {
+      var buf=String.fromCharCode.apply(null,new Uint8Array(data));
+      add_content(buf);
+    });
+
+    //jquery form and page handling
+    $(document).ready(function() {
+      $('form').submit(function(event) {
+        var input=$('input');
+        socket.send(input.val());
+
+        //clean the prompt
+        input.val('');
+
+        //leave the content on the page
+        return false;
       });
-      
-      socket.on('exit', function(data){
-        add_content(data);
-      })
-      
-      socket.on('message', function(data) {
-        var buf = String.fromCharCode.apply(null, new Uint8Array(data));
-        add_content(buf);
-      });
-      
-      //jquery form and page handling
-      $(document).ready(function(){
-        $('form').submit(function(event){
-          var input = $('input');
-          socket.send(input.val());
 
-          //clean the prompt
-          input.val(''); 
+      //let a cursor focus on the input when the page is loaded
+      $('input').focus();
+    });
+  </script>
 
-          //leave the content on the page
-          return false;
-        });
+  <style type="text/css">
+    body {
+      background-color: rgb(49, 46, 45);
+    }
 
-        //let a cursor focus on the input when the page is loaded
-        $('input').focus();
-      });
-    </script> 
+    ,
+    p,
+    input {
+      font-family: fixed;
+      font-size: 13px;
+      border: none;
+      color: grey;
+    }
 
-    <style type="text/css">
-      body, p, input {
-        font-family: fixed;
-        font-size: 13px;
-        border: none;
-      }
-      p { 
-        white-space: pre; 
-      }
-      p, form, input { 
-        margin:0; padding:0; 
-      }
-      input:focus { 
-        outline: none; 
-        border: none; 
-      }
-    </style>
-  </head>
+    p {
+      white-space: pre;
+      background-color: rgb(49, 46, 45);
+    }
 
-  <body>
-    <div></div>
-    <form>
-      &gt; <input>
-    </form>
-  </body>
+    p,
+    form,
+    input {
+      margin: 0;
+      padding: 0;
+      color: white;
+    }
+
+    input:focus {
+      outline: none;
+      border: none;
+    }
+
+    input {
+      -webkit-writing-mode: horizontal-tb !important;
+      text-rendering: auto;
+      color: -internal-light-dark(black, white);
+      letter-spacing: normal;
+      word-spacing: normal;
+      text-transform: none;
+      text-indent: 0px;
+      text-shadow: none;
+      display: inline-block;
+      text-align: start;
+      appearance: textfield;
+      background-color: black;
+      -webkit-rtl-ordering: logical;
+      cursor: text;
+      margin: 0em;
+      font: 400 13.3333px Arial;
+      padding: 1px 2px;
+      border-width: 2px;
+      border-style: inset;
+      border-color: -internal-light-dark(rgb(118, 118, 118), rgb(195, 195, 195));
+      border-image: initial;
+    }
+  </style>
+</head>
+
+<body>
+  <div></div>
+  <form>
+    &gt; <input>
+  </form>
+</body>
 
 </html>
